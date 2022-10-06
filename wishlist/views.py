@@ -1,7 +1,10 @@
+import re
+from webbrowser import get
 from django.shortcuts import render
 from wishlist.models import BarangWishlist
 
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from django.core import serializers
 
 from django.shortcuts import redirect
@@ -27,6 +30,24 @@ def show_wishlist(request):
     'last_login': request.COOKIES['last_login']
     }
     return render(request, "wishlist.html", context)
+def show_ajax(request):
+    return render(request, "wishlist_ajax.html")
+def wishlist(request):
+    return render(request, "index_wishlist.html")
+def get_wishlist_json(request):
+    wishlist_item = BarangWishlist.objects.all()
+    return HttpResponse(serializers.serialize('json', wishlist_item))
+
+def get_wishlist_item(request):
+    if request.method == "POST":
+        nama_barang = request.POST.get("nama_barang")
+        harga_barang = request.POST.get("harga_barang")
+        deskripsi = request.POST.get("deskripsi")
+
+        new_barang = BarangWishlist(nama_barang=nama_barang, harga_barang = harga_barang, deskripsi = deskripsi)
+        new_barang.save()
+        return HttpResponse(B'Created', status = 201)
+    return HttpResponseNotFound()
 
 def show_xml(request):
     data = BarangWishlist.objects.all()
